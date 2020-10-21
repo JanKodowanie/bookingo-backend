@@ -1,0 +1,81 @@
+package pw.testoprog.bookingo.models;
+
+import javax.persistence.*;
+import java.util.Set;
+
+@Entity
+public class Venue {
+    private @Id @GeneratedValue Long id;
+    private String name;
+    private String city;
+    private String address;
+    private Integer user; // TODO connect with Users table
+
+    @ManyToMany(targetEntity = ServiceType.class)
+    private Set<ServiceType> serviceTypes;
+
+    public Venue() {
+
+    }
+
+    public Venue(String name, String city, String address, Integer user, Set<ServiceType> serviceTypes) {
+        this.name = name;
+        this.city = city;
+        this.address = address;
+        this.user = user;
+        this.serviceTypes = serviceTypes;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Salon \"%s\", %s, %s. Oferowane usługi: %s", this.name, this.city, this.address, this.serviceTypes.toString());
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Integer getUser() {
+        return user;
+    }
+
+    public void setUser(Integer user) {
+        this.user = user;
+    }
+
+    public Set<ServiceType> getServiceTypes() {
+        return serviceTypes;
+    }
+
+    public void setServiceTypes(Set<ServiceType> serviceTypes) {
+        this.serviceTypes = serviceTypes;
+    }
+}
