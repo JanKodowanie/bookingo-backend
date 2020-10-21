@@ -5,7 +5,10 @@ import java.util.Set;
 
 @Entity
 public class Venue {
-    private @Id @GeneratedValue Long id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     private String name;
     private String city;
     private String address;
@@ -31,11 +34,11 @@ public class Venue {
         return String.format("Salon \"%s\", %s, %s. Oferowane usługi: %s", this.name, this.city, this.address, this.serviceTypes.toString());
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

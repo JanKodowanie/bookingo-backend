@@ -31,7 +31,7 @@ public class ServiceTypeController {
     }
 
     @PutMapping("/service-types/{id}")
-    ServiceType replaceServiceType(@RequestBody ServiceType newServiceType, @PathVariable Long id) {
+    ServiceType replaceServiceType(@RequestBody ServiceType newServiceType, @PathVariable Integer id) {
         return repository.findById(id)
                 .map(serviceType -> {
                     serviceType.setName(newServiceType.getName());
@@ -44,7 +44,7 @@ public class ServiceTypeController {
     }
 
     @DeleteMapping("/service-types/{id}")
-    void deleteServiceTypes(@PathVariable Long id) {
+    void deleteServiceTypes(@PathVariable Integer id) {
         repository.deleteById(id);
     }
 }

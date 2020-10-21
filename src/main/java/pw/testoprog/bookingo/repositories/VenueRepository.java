@@ -6,7 +6,7 @@ import pw.testoprog.bookingo.models.Venue;
 
 import java.util.List;
 
-public interface VenueRepository extends JpaRepository<Venue, Long> {
+public interface VenueRepository extends JpaRepository<Venue, Integer> {
     @Query("select v from Venue v join v.serviceTypes st where st.id = ?1")
-    List<Venue> findByServiceType(Long serviceTypeId);
+    List<Venue> findByServiceType(Integer serviceTypeId);
 }

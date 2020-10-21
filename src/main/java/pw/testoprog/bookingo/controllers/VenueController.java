@@ -31,7 +31,7 @@ public class VenueController {
     }
 
     @PutMapping("/venues/{id}")
-    Venue replaceVenue(@RequestBody Venue newVenue, @PathVariable Long id) {
+    Venue replaceVenue(@RequestBody Venue newVenue, @PathVariable Integer id) {
         return repository.findById(id)
                 .map(venue -> {
                     venue.setName(newVenue.getName());
@@ -44,7 +44,7 @@ public class VenueController {
     }
 
     @DeleteMapping("/venues/{id}")
-    void deleteVenues(@PathVariable Long id) {
+    void deleteVenues(@PathVariable Integer id) {
         repository.deleteById(id);
     }
 
@@ -54,7 +54,7 @@ public class VenueController {
      * @return lista salonow
      */
     @GetMapping("/venues/service-type/{serviceTypeId}")
-    List<Venue> venuesByServiceType(@PathVariable Long serviceTypeId) {
+    List<Venue> venuesByServiceType(@PathVariable Integer serviceTypeId) {
         return repository.findByServiceType(serviceTypeId);
     }
 }
