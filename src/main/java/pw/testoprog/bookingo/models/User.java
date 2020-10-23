@@ -31,6 +31,19 @@ public class User {
 
     public User() {}
 
+    public User(String emailAddress, String password, String firstName, String lastName, String role) {
+        this.emailAddress = emailAddress;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.role = role;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s", this.firstName, this.lastName);
+    }
+
     public UUID getId() {
         return id;
     }
