@@ -35,6 +35,10 @@ public class VenueController {
         return repository.findById(id)
                 .map(venue -> {
                     venue.setName(newVenue.getName());
+                    venue.setCity(newVenue.getCity());
+                    venue.setAddress(newVenue.getAddress());
+                    venue.setUser(newVenue.getUser());
+                    venue.setServiceTypes(newVenue.getServiceTypes());
                     return repository.save(venue);
                 })
                 .orElseGet(() -> {
