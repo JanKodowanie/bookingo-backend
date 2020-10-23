@@ -61,6 +61,27 @@ public class BookingoUserDetailsService implements UserDetailsService {
         return user.get();
     }
 
+    public User updateUser(UUID id, User user_data) throws UserNotFoundException {
+        Optional<User> user_optional = userRepository.findById(id);
+        if (!user_optional.isPresent()) {
+            throw new UserNotFoundException("User with this id was not found.");
+        }
+
+        User user = user_optional.get();
+        if (user_data.getEmailAddress() != null) {
+            user.setEmailAddress(user_data.getEmailAddress());
+        }
+        if (user_data.getFirstName() != null) {
+            user.setEmailAddress(user_data.getFirstName());
+        }
+        if (user_data.getLastName() != null) {
+            user.setEmailAddress(user_data.getLastName());
+        }
+
+        userRepository.save(user);
+        return user;
+    }
+
     public void deleteUser(UUID id) throws UserNotFoundException {
         Optional<User> user = userRepository.findById(id);
         if (!user.isPresent()) {

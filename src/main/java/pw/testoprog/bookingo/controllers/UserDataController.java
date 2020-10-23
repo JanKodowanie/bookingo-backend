@@ -34,6 +34,23 @@ public class UserDataController {
                 .body(user);
     }
 
+    @PatchMapping("/user/{id}")
+    public ResponseEntity editUserDetails(@PathVariable UUID id, @RequestBody User user_data) {
+        User user = null;
+        try {
+            user = userDetailsService.getUserDetails(id);
+            user = userDetailsService.updateUser(id, user_data);
+        } catch (UserNotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("User with the given id was not found."));
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(user);
+    }
+
     @DeleteMapping("/user/{id}")
     public ResponseEntity deleteUser(@PathVariable UUID id) {
         User user = null;
