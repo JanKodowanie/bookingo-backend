@@ -1,6 +1,11 @@
 package pw.testoprog.bookingo.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.lang.NonNull;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -11,26 +16,20 @@ public class User {
     @GeneratedValue
     private UUID id;
     @Column(unique = true)
+    @NotNull(message = "emailAddress must be provided.")
     private String emailAddress;
+    @NotNull(message = "password must be provided.")
     private String password;
+    @NotNull(message = "firstName must be provided.")
     private String firstName;
+    @NotNull(message = "lastName must be provided.")
     private String lastName;
     @Column(nullable = false, updatable = false)
-    private LocalDate createdOn;
-    private boolean active;
+    private LocalDate createdOn = LocalDate.now();
+    private boolean active = true;
     private String role;
 
     public User() {}
-
-    public User(String emailAddress, String password, String firstName, String lastName, String role) {
-        this.emailAddress = emailAddress;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.role = role;
-        this.createdOn = LocalDate.now();
-        this.active = true;
-    }
 
     public UUID getId() {
         return id;
@@ -48,10 +47,12 @@ public class User {
         this.emailAddress = emailAddress;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
 
+    @JsonProperty("password")
     public void setPassword(String password) {
         this.password = password;
     }
