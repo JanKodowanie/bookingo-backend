@@ -12,7 +12,9 @@ public class Venue {
     private String name;
     private String city;
     private String address;
-    private Integer user; // TODO connect with Users table
+
+    @ManyToOne()
+    private User user;
 
     @ManyToMany(targetEntity = ServiceType.class)
     private Set<ServiceType> serviceTypes;
@@ -21,7 +23,7 @@ public class Venue {
 
     }
 
-    public Venue(String name, String city, String address, Integer user, Set<ServiceType> serviceTypes) {
+    public Venue(String name, String city, String address, User user, Set<ServiceType> serviceTypes) {
         this.name = name;
         this.city = city;
         this.address = address;
@@ -31,7 +33,7 @@ public class Venue {
 
     @Override
     public String toString() {
-        return String.format("Salon \"%s\", %s, %s. Oferowane usługi: %s", this.name, this.city, this.address, this.serviceTypes.toString());
+        return String.format("Salon %s \"%s\", %s, %s. Oferowane usługi: %s", this.user, this.name, this.city, this.address, this.serviceTypes.toString());
     }
 
     public Integer getId() {
@@ -66,11 +68,11 @@ public class Venue {
         this.address = address;
     }
 
-    public Integer getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(Integer user) {
+    public void setUser(User user) {
         this.user = user;
     }
 

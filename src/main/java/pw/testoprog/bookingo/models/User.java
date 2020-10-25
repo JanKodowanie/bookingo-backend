@@ -3,6 +3,7 @@ package pw.testoprog.bookingo.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
@@ -32,6 +33,19 @@ public class User {
     private String role;
 
     public User() {}
+
+    public User(String emailAddress, String password, String firstName, String lastName, String role) {
+        this.emailAddress = emailAddress;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.role = role;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s", this.firstName, this.lastName);
+    }
 
     public UUID getId() {
         return id;
