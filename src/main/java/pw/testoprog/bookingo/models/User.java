@@ -1,6 +1,7 @@
 package pw.testoprog.bookingo.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.lang.NonNull;
 
@@ -25,6 +26,7 @@ public class User {
     @NotNull(message = "lastName must be provided.")
     private String lastName;
     @Column(nullable = false, updatable = false)
+    @JsonIgnore
     private LocalDate createdOn = LocalDate.now();
     private boolean active = true;
     private String role;
