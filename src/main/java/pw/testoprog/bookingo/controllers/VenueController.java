@@ -89,8 +89,17 @@ public class VenueController {
     }
 
     @DeleteMapping("/venues/{id}")
-    void deleteVenues(@PathVariable Integer id) {
-        repository.deleteById(id);
+    ResponseEntity deleteVenues(@PathVariable Integer id) {
+        try{
+            repository.deleteById(id);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("");
+        }
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .body("");
     }
 
     /**
