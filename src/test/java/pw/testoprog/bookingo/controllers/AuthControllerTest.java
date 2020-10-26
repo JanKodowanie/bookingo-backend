@@ -1,5 +1,6 @@
 package pw.testoprog.bookingo.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +32,7 @@ class AuthControllerTest {
     @MockBean
     private AuthenticationManager authenticationManager;
 
-    @MockBean
+    @Autowired
     BookingoUserDetailsService userDetailsService;
 
     @MockBean
@@ -41,56 +42,24 @@ class AuthControllerTest {
 
     private ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
 
-    @BeforeEach
-    public void setup() {
-
-    }
-
     @Test
     void givenProperRegistrationData_whenRegisteringUser_thenReturn2xxResponse() throws Exception {
-
-
-
-        User newUser = new User();
-        newUser.setFirstName("testname");
-        newUser.setEmailAddress("taest@test.com");
-        newUser.setPassword("testPassword");
-        newUser.setLastName("testsurname");
-
-        /*mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
-        String requestJson=ow.writeValueAsString(newUser);*/
-
-        String body = "{\n" +
-                "  \"emailAddress\" : \"taest@example.coam\",\n" +
-                "  \"firstName\" : \"aaa\",\n" +
-                "  \"lastName\" : \"Test last namea\",\n" +
-                "  \"password\" : \"passa\"\n" +
-                "}";
 
         mockMvc.perform( MockMvcRequestBuilders
                 .post("/auth/register/standard")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(ow.writeValueAsString(newUser))
-//                .content(body)
+                .content("{ \"firstName\":\"testUser\", \"lastName\":\"testUser\", \"emailAddress\":\"testUser@test.test\", \"password\":\"testUser\" }")
         )
         .andExpect(status().is2xxSuccessful());
-
     }
 
     @Test
     void givenProperRegistrationData_whenRegisteringEntrepreneur_thenReturn2xxResponse() throws Exception {
 
-        User newUser = new User();
-        newUser.setFirstName("testname");
-        newUser.setEmailAddress("taest@test.com");
-        newUser.setPassword("testPassword");
-        newUser.setLastName("testsurname");
-
         mockMvc.perform( MockMvcRequestBuilders
                         .post("/auth/register/entrepreneur")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(ow.writeValueAsString(newUser))
+                        .content("{ \"firstName\":\"testEntrepreneur\", \"lastName\":\"testEntrepreneur\", \"emailAddress\":\"testEntrepreneur@test.test\", \"password\":\"testEntrepreneur\" }")
         )
                 .andExpect(status().is2xxSuccessful());
     }
@@ -98,16 +67,10 @@ class AuthControllerTest {
     @Test
     void givenProperRegistrationData_whenRegisteringAdmin_thenReturn2xxResponse() throws Exception {
 
-        User newUser = new User();
-        newUser.setFirstName("testname");
-        newUser.setEmailAddress("taest@test.com");
-        newUser.setPassword("testPassword");
-        newUser.setLastName("testsurname");
-
         mockMvc.perform( MockMvcRequestBuilders
                         .post("/auth/register/admin")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(ow.writeValueAsString(newUser))
+                .content("{ \"firstName\":\"testAdmin\", \"lastName\":\"testAdmin\", \"emailAddress\":\"testAdmin@test.test\", \"password\":\"testAdmin\" }")
         )
                 .andExpect(status().is2xxSuccessful());
     }
