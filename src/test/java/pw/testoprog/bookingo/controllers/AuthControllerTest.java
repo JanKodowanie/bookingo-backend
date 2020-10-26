@@ -1,11 +1,7 @@
 package pw.testoprog.bookingo.controllers;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,10 +37,7 @@ class AuthControllerTest {
     @MockBean
     JWTManager jwtManager;
 
-    private User user;
-
     private ObjectMapper mapper = new ObjectMapper();
-
 
     private ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
 
