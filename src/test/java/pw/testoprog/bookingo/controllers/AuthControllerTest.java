@@ -1,9 +1,7 @@
 package pw.testoprog.bookingo.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,13 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import pw.testoprog.bookingo.models.User;
 import pw.testoprog.bookingo.services.BookingoUserDetailsService;
 import pw.testoprog.bookingo.services.JWTManager;
-import java.time.LocalDate;
-import java.util.UUID;
 
-import static org.springframework.mock.http.server.reactive.MockServerHttpRequest.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -29,7 +23,7 @@ class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
@@ -45,34 +39,70 @@ class AuthControllerTest {
     @Test
     void givenProperRegistrationData_whenRegisteringUser_thenReturn2xxResponse() throws Exception {
 
-        mockMvc.perform( MockMvcRequestBuilders
+        mockMvc.perform(MockMvcRequestBuilders
                 .post("/auth/register/standard")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"firstName\":\"testUser\", \"lastName\":\"testUser\", \"emailAddress\":\"testUser@test.test\", \"password\":\"testUser\" }")
         )
-        .andExpect(status().is2xxSuccessful());
+                .andExpect(status().is2xxSuccessful());
+
+    }
+
+    @Test
+    void givenImproperRegistrationData_whenRegisteringUser_thenReturn4xxResponse() throws Exception {
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/register/standard")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"firstName\":\"testUser\", \"lastName\":\"testUser\", \"emailAddress\":\"testUser@test.test\" }")
+        )
+                .andExpect(status().is4xxClientError());
+
     }
 
     @Test
     void givenProperRegistrationData_whenRegisteringEntrepreneur_thenReturn2xxResponse() throws Exception {
 
-        mockMvc.perform( MockMvcRequestBuilders
-                        .post("/auth/register/entrepreneur")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"firstName\":\"testEntrepreneur\", \"lastName\":\"testEntrepreneur\", \"emailAddress\":\"testEntrepreneur@test.test\", \"password\":\"testEntrepreneur\" }")
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/register/entrepreneur")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"firstName\":\"testEntrepreneur\", \"lastName\":\"testEntrepreneur\", \"emailAddress\":\"testEntrepreneur@test.test\", \"password\":\"testEntrepreneur\" }")
         )
                 .andExpect(status().is2xxSuccessful());
     }
 
     @Test
+    void givenImproperRegistrationData_whenRegisteringEntrepreneur_thenReturn4xxResponse() throws Exception {
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/register/standard")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"firstName\":\"testUser\", \"lastName\":\"testUser\", \"emailAddress\":\"testUser@test.test\" }")
+        )
+                .andExpect(status().is4xxClientError());
+
+    }
+
+    @Test
     void givenProperRegistrationData_whenRegisteringAdmin_thenReturn2xxResponse() throws Exception {
 
-        mockMvc.perform( MockMvcRequestBuilders
-                        .post("/auth/register/admin")
-                        .contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/register/admin")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"firstName\":\"testAdmin\", \"lastName\":\"testAdmin\", \"emailAddress\":\"testAdmin@test.test\", \"password\":\"testAdmin\" }")
         )
                 .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    void givenImproperRegistrationData_whenRegisteringAdmin_thenReturn4xxResponse() throws Exception {
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/register/admin")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"firstName\":\"testAdmin\", \"lastName\":\"testAdmin\", \"emailAddress\":\"testAdmin@test.test\", \"password\":null }")
+        )
+                .andExpect(status().is4xxClientError());
     }
 
 }
