@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import pw.testoprog.bookingo.services.BookingoUserDetailsService;
 import pw.testoprog.bookingo.services.JWTManager;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -103,6 +104,34 @@ class AuthControllerTest {
                 .content("{ \"firstName\":\"testAdmin\", \"lastName\":\"testAdmin\", \"emailAddress\":\"testAdmin@test.test\", \"password\":null }")
         )
                 .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void createUserTest() throws Exception {
+
+        //  użytkownik nie może się zalogować - błędne dane logowania (konto nie istnieje)
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"email\":\"testUser@test.test\", \"password\":\"testUser\" }")
+        )
+                .andExpect(status().is4xxClientError());
+
+        //  tworzenie konta użytkownika
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/register/standard")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"firstName\":\"testUser\", \"lastName\":\"testUser\", \"emailAddress\":\"testUser@test.test\", \"password\":\"testUser\" }")
+        )
+                .andExpect(status().is2xxSuccessful());
+
+        // użytkownik może się zalogować - konto zostało utworzone
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"email\":\"testUser@test.test\", \"password\":\"testUser\" }")
+        )
+                .andExpect(status().is2xxSuccessful());
     }
 
 }
