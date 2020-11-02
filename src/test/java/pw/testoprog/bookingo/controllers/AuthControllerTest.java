@@ -27,7 +27,7 @@ class AuthControllerTest {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    BookingoUserDetailsService userDetailsService;
+    BookingoUserDetailsService bookingoUserDetailsService;
 
     @MockBean
     JWTManager jwtManager;
@@ -35,6 +35,34 @@ class AuthControllerTest {
     private ObjectMapper mapper = new ObjectMapper();
 
     private ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+
+    @Test
+    void createUserTest() throws Exception {
+
+        //  użytkownik nie może się zalogować - błędne dane logowania (konto nie istnieje)
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"email\":\"testUser@test.test\", \"password\":\"testUser\" }")
+        )
+                .andExpect(status().is4xxClientError());
+
+        //  tworzenie konta użytkownika
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/register/standard")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"firstName\":\"testUser\", \"lastName\":\"testUser\", \"emailAddress\":\"testUser@test.test\", \"password\":\"testUser\" }")
+        )
+                .andExpect(status().is2xxSuccessful());
+
+        // użytkownik może się zalogować - konto zostało utworzone
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"email\":\"testUser@test.test\", \"password\":\"testUser\" }")
+        )
+                .andExpect(status().is2xxSuccessful());
+    }
 
     @Test
     void givenProperRegistrationData_whenRegisteringUser_thenReturn2xxResponse() throws Exception {
