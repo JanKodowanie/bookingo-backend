@@ -1,7 +1,9 @@
 package pw.testoprog.bookingo.models;
 
 import javax.persistence.*;
+import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 public class Venue {
@@ -38,10 +40,6 @@ public class Venue {
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -82,5 +80,26 @@ public class Venue {
 
     public void setServiceTypes(Set<ServiceType> serviceTypes) {
         this.serviceTypes = serviceTypes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Venue venue = (Venue) o;
+        return name.equals(venue.name) &&
+                city.equals(venue.city) &&
+                address.equals(venue.address) &&
+                user.getId().equals(venue.user.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, city, address, user.getId(), serviceTypes);
+    }
+
+    @Override
+    public Venue clone() throws CloneNotSupportedException {
+        return new Venue(this.name, this.city, this.address, this.user, this.serviceTypes);
     }
 }
