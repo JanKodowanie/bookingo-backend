@@ -2,6 +2,7 @@ package pw.testoprog.bookingo.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import pw.testoprog.bookingo.exceptions.UserNotFoundException;
 import pw.testoprog.bookingo.models.User;
@@ -45,12 +47,27 @@ class UserDataControllerTest {
         user.setFirstName("Test");
     }
 
+    User expectedUser = new User(
+            "testUser@test.test",
+            "password",
+            "testUser",
+            "testUser",
+            "Standard"
+    );
+
     @Test
     void givenProperUserId_whenGettingUserDetails_thenReturnOkResponse() throws Exception {
         given(userDetailsService.getUserDetails(user.getId())).willReturn(user);
 
         mockMvc.perform(get("/user/{userId}", user.getId()))
                 .andExpect(status().isOk());
+
+        try {
+            UserDetails u = userDetailsService.loadUserByUsername("testUser@test.test");
+            Assert.assertEquals(u.getUsername(), expectedUser.getEmailAddress());
+        } catch (Exception ignored) {
+
+        }
     }
 
     @Test
@@ -60,6 +77,13 @@ class UserDataControllerTest {
 
         mockMvc.perform(get("/user/{userId}", wrongId))
                 .andExpect(status().isNotFound());
+
+        try {
+            UserDetails u = userDetailsService.loadUserByUsername("random@test.test");
+            Assert.assertNotEquals(u.getUsername(), expectedUser.getEmailAddress());
+        } catch (Exception ignored) {
+
+        }
     }
 
     @Test
@@ -67,7 +91,7 @@ class UserDataControllerTest {
         User newUser = new User();
         newUser.setId(user.getId());
         newUser.setFirstName("Changed first name");
-        newUser.setEmailAddress("test@example.com");
+        newUser.setEmailAddress("testUser@test.test");
         newUser.setPassword("pass");
         newUser.setLastName("Test last name");
         newUser.setCreatedOn(LocalDate.now());
@@ -81,7 +105,15 @@ class UserDataControllerTest {
                     .content(ow.writeValueAsString(newUser))
                 )
                 .andExpect(status().isOk());
+
+        try {
+            UserDetails u = userDetailsService.loadUserByUsername("testUser@test.test");
+            Assert.assertEquals(u.getUsername(), newUser.getEmailAddress());
+        } catch (Exception ignored) {
+
+        }
     }
+
 
     @Test
     void givenWrongUserId_whenEditingUserDetails_thenReturnNotFoundResponse() throws Exception {
@@ -104,6 +136,13 @@ class UserDataControllerTest {
                         .content(ow.writeValueAsString(newUser))
         )
                 .andExpect(status().isNotFound());
+
+        try {
+            UserDetails u = userDetailsService.loadUserByUsername("testUser@test.test");
+            Assert.assertNotEquals(u.getUsername(), newUser.getEmailAddress());
+        } catch (Exception ignored) {
+
+        }
     }
 
     @Test
@@ -112,7 +151,7 @@ class UserDataControllerTest {
 
         mockMvc.perform(delete("/user/{id}", user.getId()))
                 .andExpect(status().isOk());
-
+        
     }
 
     @Test
@@ -123,6 +162,15 @@ class UserDataControllerTest {
 
         mockMvc.perform(delete("/user/{id}", wrongId))
                 .andExpect(status().isNotFound());
+
+        try {
+            UserDetails u = userDetailsService.loadUserByUsername("random@test.test");
+            Assert.assertNull(u);
+        } catch (Exception ignored) {
+
+        }
     }
+
+
 
 }
