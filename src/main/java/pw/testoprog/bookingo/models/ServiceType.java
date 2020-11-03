@@ -1,6 +1,7 @@
 package pw.testoprog.bookingo.models;
 
 import javax.persistence.*;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -11,7 +12,7 @@ public class ServiceType {
     private Integer id;
     private String name;
 
-    @ManyToMany(targetEntity = Venue.class)
+    @ManyToMany(targetEntity = Venue.class, cascade=CascadeType.ALL)
     private Set<Venue> venues;
 
     protected ServiceType() {
@@ -53,5 +54,19 @@ public class ServiceType {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServiceType that = (ServiceType) o;
+        return id.equals(that.id) &&
+                name.equals(that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
     }
 }
