@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ReviewControllerTest {
+
     /*
     @Autowired
     private MockMvc mockMvc;
@@ -100,7 +101,7 @@ public class ReviewControllerTest {
     @Test
     void updateReview_getUpdatedData() throws Exception {
         //Add review to database
-        newReview = reviewService.addReview(newReview, newVenue.getId());
+        newReview = reviewService.addReview(newReview, newVenue.getId(), newService.getId());
 
         //Get review to update
         MvcResult resultAction = mockMvc.perform(get("/review/{id}", newReview.getId()))
@@ -129,7 +130,7 @@ public class ReviewControllerTest {
     @Test
     void deleteAReview_checkIfRemoved() throws Exception {
         //Adding review to database
-        newReview = reviewService.addReview(newReview, newVenue.getId());
+        newReview = reviewService.addReview(newReview, newVenue.getId(), newService.getId());
 
         //Delete review
         mockMvc.perform(delete("/review/{id}", newReview.getId()))
@@ -137,6 +138,39 @@ public class ReviewControllerTest {
 
         //Check if deleted
         mockMvc.perform(get("/review/{id}", newReview.getId()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getReviewById_returnProperData() throws Exception {
+        newReview = reviewService.addReview(newReview, newVenue.getId(), newService.getId());
+
+        MvcResult mvcResult = mockMvc.perform(get("/venues/{id}/reviews", newVenue.getId()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Review resultReview = om.readValues(mvcResult.getResponse().getContentAsString(), Review.class);
+
+        Assert.assertEquals(newReview,resultReview);
+    }
+
+    @Test
+    void getReviewByWrongId_getNotFound() throws Exception {
+        mockMvc.perform(get("/review/{id}", -100))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void uploadInvalidReview_getBadRequest() throws Exception {
+        mockMvc.perform(post("/venues/{id}/reviews", newVenue.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(ow.writeValueAsString(newUser)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deleteReviewByInvalidId_getNotFound() throws Exception {
+        mockMvc.perform(delete("/review/{id}", -100))
                 .andExpect(status().isNotFound());
     }
 
