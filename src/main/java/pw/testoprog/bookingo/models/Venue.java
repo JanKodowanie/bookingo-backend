@@ -21,6 +21,9 @@ public class Venue {
     @ManyToMany(targetEntity = ServiceType.class)
     private Set<ServiceType> serviceTypes;
 
+    @OneToMany
+    private Set<GalleryPhoto> galleryPhotos;
+
     public Venue() {
 
     }
@@ -36,6 +39,10 @@ public class Venue {
     @Override
     public String toString() {
         return String.format("Salon %s \"%s\", %s, %s. Oferowane usługi: %s", this.user, this.name, this.city, this.address, this.serviceTypes.toString());
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public Integer getId() {
@@ -101,5 +108,13 @@ public class Venue {
     @Override
     public Venue clone() throws CloneNotSupportedException {
         return new Venue(this.name, this.city, this.address, this.user, this.serviceTypes);
+    }
+
+    public Set<GalleryPhoto> getGalleryPhotos() {
+        return galleryPhotos;
+    }
+
+    public void setGalleryPhotos(Set<GalleryPhoto> galleryPhotos) {
+        this.galleryPhotos = galleryPhotos;
     }
 }
