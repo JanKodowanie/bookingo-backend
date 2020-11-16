@@ -31,6 +31,9 @@ public class GalleryPhotoControllerTest {
     private MockMvc mockMvc;
 
     private final static String resourcePath = "/venues/{venue_id}/gallery-photos";
+    private final static String downloadPath = "/download/{file_name}";
+    private final static String correctFileName = "test.png";
+    private final static String incorrectFileName = "incorrect.png";
     private InputStream inputStream;
     private MockMultipartFile photo;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -40,31 +43,28 @@ public class GalleryPhotoControllerTest {
     @Autowired
     private VenueRepository venueRepository;
 
-    @Autowired
-    private FileStorageService fileStorageService;
-
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() {
         venue = new Venue();
         venue = venueRepository.save(venue);
-
     }
 
     @Test
     void givenCorrectFilePath_whenUploadingNewPicture_shouldReturnStatus200() throws Exception {
-        inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.png");
-        photo = new MockMultipartFile("file", "test.png", "image/png", inputStream);
+        inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(correctFileName);
+        photo = new MockMultipartFile("file", correctFileName, "image/png", inputStream);
         mockMvc.perform(multipart(resourcePath, venue.getId()).file(photo))
                 .andExpect(status().isOk());
+        inputStream.close();
     }
 
     @Test
     void givenCorrectFilePath_whenUploadingNewPicture_shouldRetainSameMd5Hash() throws Exception {
-        inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.png");
+        inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(correctFileName);
         String originalHash = DigestUtils.md5DigestAsHex(inputStream);
         inputStream.close();
-        inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.png");
-        photo = new MockMultipartFile("file", "test.png", "image/png", inputStream);
+        inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(correctFileName);
+        photo = new MockMultipartFile("file", correctFileName, "image/png", inputStream);
         MvcResult result = mockMvc.perform(multipart(resourcePath, venue.getId()).file(photo))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -75,10 +75,12 @@ public class GalleryPhotoControllerTest {
         String downloadHash = DigestUtils.md5DigestAsHex(downloadInputStream);
         downloadInputStream.close();
         Assert.assertEquals(originalHash, downloadHash);
+        inputStream.close();
     }
 
-    @AfterEach
-    void closeStream() throws Exception {
-        inputStream.close();
+    @Test
+    void givenIncorrectFileName_whenDownloadingPicture_shouldReturnStatus404 () throws Exception {
+        mockMvc.perform(get(downloadPath, incorrectFileName))
+                .andExpect(status().isNotFound());
     }
 }
