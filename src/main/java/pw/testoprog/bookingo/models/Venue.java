@@ -21,7 +21,7 @@ public class Venue {
     @ManyToMany(targetEntity = ServiceType.class)
     private Set<ServiceType> serviceTypes;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private Set<GalleryPhoto> galleryPhotos;
 
     public Venue() {
