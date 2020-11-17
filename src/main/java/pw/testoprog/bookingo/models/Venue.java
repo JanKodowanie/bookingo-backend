@@ -15,10 +15,10 @@ public class Venue {
     private String city;
     private String address;
 
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.EAGER)
     private User user;
 
-    @ManyToMany(targetEntity = ServiceType.class)
+    @ManyToMany(targetEntity = ServiceType.class, fetch = FetchType.EAGER)
     private Set<ServiceType> serviceTypes;
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -102,7 +102,7 @@ public class Venue {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, city, address, user.getId(), serviceTypes);
+        return Objects.hash(name, city, address, user.getId());
     }
 
     @Override
