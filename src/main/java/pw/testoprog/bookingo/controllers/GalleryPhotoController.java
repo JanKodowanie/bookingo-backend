@@ -20,20 +20,21 @@ import java.io.IOException;
 
 @RestController
 public class GalleryPhotoController {
-    private final GalleryPhotoRepository repository;
-    private final VenueRepository venueRepository;
+
+    @Autowired
+    private GalleryPhotoRepository repository;
+
+    @Autowired
+    private VenueRepository venueRepository;
 
     @Autowired
     private FileStorageService fileStorageService;
 
-    public GalleryPhotoController(GalleryPhotoRepository repository, VenueRepository venueRepository) {
-        this.repository = repository;
-        this.venueRepository = venueRepository;
-    }
+
 
     @PostMapping("/venues/{venue_id}/gallery-photos")
     ResponseEntity newGalleryPhoto(@RequestParam("file") MultipartFile file, @PathVariable Integer venue_id) {
-        String fileName = fileStorageService.storeFile(file);
+        String fileName = fileStorageService.storeFile(file, new String[]{"venues", venue_id.toString()}, new String[]{"jpg", "png", "jpeg"});
 
         String url = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/download/")
@@ -45,7 +46,7 @@ public class GalleryPhotoController {
         repository.save(photo);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body("{\"url\":\"" + fileStorageService.getAbsolutePath(fileName) + "\"}");
+                .body("{\"url\":\"" + fileName + "\"}");
     }
 
     @GetMapping("/download/{fileName:.+}")

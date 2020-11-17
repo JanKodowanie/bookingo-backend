@@ -4,18 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import pw.testoprog.bookingo.exceptions.FileStorageException;
 import pw.testoprog.bookingo.exceptions.MyFileNotFoundException;
 import pw.testoprog.bookingo.properties.FileStorageProperties;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.UUID;
 
 @Service
 public class FileStorageService {
@@ -34,9 +34,9 @@ public class FileStorageService {
         }
     }
 
-    public String storeFile(MultipartFile file) {
+    public String storeFile(MultipartFile file, String[] subdirectories, String[] acceptedExts) {
         // Normalize file name
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileName = file.getOriginalFilename();
 
         try {
             // Check if the file's name contains invalid characters
@@ -44,31 +44,48 @@ public class FileStorageService {
                 throw new FileStorageException("Sorry! Filename contains invalid path sequence " + fileName);
             }
 
-            // Copy file to the target location (Replacing existing file with the same name)
-            Path targetLocation = this.fileStorageLocation.resolve(fileName);
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+            String extension = fileName.split("[.]", 2)[1];
 
-            return fileName;
+            if (!Arrays.asList(acceptedExts).contains(extension)) {
+                throw new FileStorageException("Format not supported. Please upload " + String.join(", ", acceptedExts));
+            }
+
+            String newFileName = UUID.randomUUID().toString() + "." + extension;
+            Path targetLocation = this.fileStorageLocation;
+            for (String str : subdirectories) {
+                targetLocation = targetLocation.resolve(str);
+            }
+
+            if (!Files.exists(targetLocation)) {
+                Files.createDirectories(targetLocation);
+            }
+            Path targetFile = targetLocation.resolve(newFileName);
+            Files.createFile(targetFile);
+            Files.copy(file.getInputStream(), targetFile, StandardCopyOption.REPLACE_EXISTING);
+
+            return String.join("/", subdirectories).join("/", newFileName);
         } catch (IOException ex) {
             throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
         }
     }
 
-    public Resource loadFileAsResource(String fileName) {
+    public Resource loadFileAsResource(String path) {
         try {
-            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            String[] splitPath = path.split("[/]", 2);
+            Path filePath = this.fileStorageLocation.resolve(splitPath[0]).resolve(splitPath[1]);
             Resource resource = new UrlResource(filePath.toUri());
             if(resource.exists()) {
                 return resource;
             } else {
-                throw new MyFileNotFoundException("File not found " + fileName);
+                throw new MyFileNotFoundException("File not found " + path);
             }
         } catch (MalformedURLException ex) {
-            throw new MyFileNotFoundException("File not found " + fileName, ex);
+            throw new MyFileNotFoundException("File not found " + path, ex);
         }
     }
 
-    public String getAbsolutePath(String fileName) {
-        return this.fileStorageLocation.resolve(fileName).normalize().toString().replace("\\", "\\\\");
-    }
+//    public String getAbsolutePath(String path) {
+//        String[] splitPath = path.split("/", 2);
+//        return this.fileStorageLocation.resolve(fileName).normalize().toString().replace("\\", "\\\\");
+//    }
 }
