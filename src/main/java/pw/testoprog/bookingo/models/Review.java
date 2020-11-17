@@ -12,16 +12,16 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.EAGER)
     private User user;
 
     private String content;
     private Date creationDate;
 
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.EAGER)
     private Venue venue;
 
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.EAGER)
     private ServiceType serviceType;
 
     public Review() { }
@@ -79,11 +79,10 @@ public class Review {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Review review = (Review) o;
-        return user.equals(review.user) &&
+        return user.getId().equals(review.user.getId()) &&
                 content.equals(review.content) &&
-                creationDate.equals(review.creationDate) &&
-                venue.equals(review.venue) &&
-                serviceType.equals(review.serviceType);
+                venue.getId().equals(review.venue.getId()) &&
+                serviceType.getId().equals(review.serviceType.getId());
     }
 
     @Override

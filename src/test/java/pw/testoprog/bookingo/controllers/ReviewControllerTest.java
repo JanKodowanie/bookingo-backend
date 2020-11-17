@@ -4,7 +4,7 @@ package pw.testoprog.bookingo.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -12,11 +12,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import pw.testoprog.bookingo.models.Review;
 import pw.testoprog.bookingo.models.ServiceType;
 import pw.testoprog.bookingo.models.User;
 import pw.testoprog.bookingo.models.Venue;
 import pw.testoprog.bookingo.repositories.ServiceTypeRepository;
 import pw.testoprog.bookingo.services.BookingoUserDetailsService;
+import pw.testoprog.bookingo.services.ReviewService;
 import pw.testoprog.bookingo.services.VenueService;
 
 import java.util.Arrays;
@@ -30,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class ReviewControllerTest {
 
-    /*
     @Autowired
     private MockMvc mockMvc;
 
@@ -46,8 +47,8 @@ public class ReviewControllerTest {
     @Autowired
     ReviewService reviewService;
 
-    ObjectMapper om = new ObjectMapper();
-    ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
+    private ObjectMapper om = new ObjectMapper();
+    private ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
 
     private User newUser;
     private Venue newVenue;
@@ -65,11 +66,11 @@ public class ReviewControllerTest {
         //Create venue & service type
         newService = new ServiceType("Test1");
         serviceTypeRepository.save(newService);
-        newVenue = new Venue("Test Venue", "Test City", "Test Address", newUser, new HashSet<>(Arrays.asList(s1)));
+        newVenue = new Venue("Test Venue", "Test City", "Test Address", newUser, new HashSet(Arrays.asList(newService)));
         newVenue = venueService.addNewVenue(newVenue);
 
         //Create review
-        newReview = new Review(newUser.getId(), "test content", newService.getId());
+        newReview = new Review(newUser, "test content", newVenue, newService);
     }
 
 
@@ -77,23 +78,25 @@ public class ReviewControllerTest {
     @Test
     void postReview_checkIfAddedToDatabase() throws Exception {
         //Post new review
-        mockMvc.perform(post("/venues/{venue-id})/reviews",newVenue.getId())
+        MvcResult postResult = mockMvc.perform(post("/venues/{id}/reviews",newVenue.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(ow.writeValueAsString(newReview)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andReturn();
+        Review newReview = om.readValue(postResult.getResponse().getContentAsString(), Review.class);
 
         //Get posted review
-        MvcResult resultAction = mockMvc.perform(get("/venues/{venue-id}/reviews", newVenue.getId()))
+        MvcResult resultAction = mockMvc.perform(get("/venues/{id}/reviews", newVenue.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Review responseReviews[] = om.readValue(resultAction.getResponse().getContentAsString(), Review.class);
+        Boolean isPresent = false;
+        Review responseReviews[] = om.readValue(resultAction.getResponse().getContentAsString(), Review[].class);
         for(int i=0; i<responseReviews.length; i++) {
             Review responseReview = responseReviews[i];
-            if (newReview.equals(responseReview))
-                Assert.assertTrue(true);
+            isPresent = true;
         }
-        Assert.assertTrue(false);
+        Assert.assertTrue(isPresent);
     }
 
 
@@ -101,7 +104,7 @@ public class ReviewControllerTest {
     @Test
     void updateReview_getUpdatedData() throws Exception {
         //Add review to database
-        newReview = reviewService.addReview(newReview, newVenue.getId(), newService.getId());
+        newReview = reviewService.addReview(newReview, newVenue.getId());
 
         //Get review to update
         MvcResult resultAction = mockMvc.perform(get("/review/{id}", newReview.getId()))
@@ -130,10 +133,12 @@ public class ReviewControllerTest {
     @Test
     void deleteAReview_checkIfRemoved() throws Exception {
         //Adding review to database
-        newReview = reviewService.addReview(newReview, newVenue.getId(), newService.getId());
+        newReview = reviewService.addReview(newReview, newVenue.getId());
 
         //Delete review
-        mockMvc.perform(delete("/review/{id}", newReview.getId()))
+        mockMvc.perform(delete("/review/{id}", newReview.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(ow.writeValueAsString(newUser)))
                 .andExpect(status().isNoContent());
 
         //Check if deleted
@@ -143,13 +148,13 @@ public class ReviewControllerTest {
 
     @Test
     void getReviewById_returnProperData() throws Exception {
-        newReview = reviewService.addReview(newReview, newVenue.getId(), newService.getId());
+        newReview = reviewService.addReview(newReview, newVenue.getId());
 
-        MvcResult mvcResult = mockMvc.perform(get("/venues/{id}/reviews", newVenue.getId()))
+        MvcResult mvcResult = mockMvc.perform(get("/review/{id}", newReview.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Review resultReview = om.readValues(mvcResult.getResponse().getContentAsString(), Review.class);
+        Review resultReview = om.readValue(mvcResult.getResponse().getContentAsString(), Review.class);
 
         Assert.assertEquals(newReview,resultReview);
     }
@@ -170,9 +175,9 @@ public class ReviewControllerTest {
 
     @Test
     void deleteReviewByInvalidId_getNotFound() throws Exception {
-        mockMvc.perform(delete("/review/{id}", -100))
+        mockMvc.perform(delete("/review/{id}", -100)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(ow.writeValueAsString(newUser)))
                 .andExpect(status().isNotFound());
     }
-
-    */
 }

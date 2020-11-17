@@ -64,8 +64,8 @@ public class ReviewService {
         return optionalReview.get();
     }
 
-    public void deleteReview(Integer id, UUID userId) throws UserNotFoundException, UnauthorizedUserException, ReviewNotFoundException {
-        Optional<User> optionalUser = userRepository.findById(userId);
+    public void deleteReview(Integer id, User user) throws UserNotFoundException, UnauthorizedUserException, ReviewNotFoundException {
+        Optional<User> optionalUser = userRepository.findById(user.getId());
         Optional<Review> optionalReview = reviewRepository.findById(id);
         if(!optionalUser.isPresent()){
             throw new UserNotFoundException("No user with given id");

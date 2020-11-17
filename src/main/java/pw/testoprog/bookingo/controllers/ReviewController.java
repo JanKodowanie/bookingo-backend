@@ -1,6 +1,5 @@
 package pw.testoprog.bookingo.controllers;
 
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,11 +8,11 @@ import pw.testoprog.bookingo.exceptions.ReviewNotFoundException;
 import pw.testoprog.bookingo.exceptions.UnauthorizedUserException;
 import pw.testoprog.bookingo.exceptions.UserNotFoundException;
 import pw.testoprog.bookingo.models.Review;
+import pw.testoprog.bookingo.models.User;
 import pw.testoprog.bookingo.services.ReviewService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 public class ReviewController {
@@ -65,9 +64,9 @@ public class ReviewController {
     }
 
     @DeleteMapping("/review/{id}")
-    ResponseEntity deleteVenueById(@PathVariable Integer id, @RequestBody UUID userId) {
+    ResponseEntity deleteVenueById(@PathVariable Integer id, @RequestBody User user) {
         try {
-            reviewService.deleteReview(id, userId);
+            reviewService.deleteReview(id, user);
             return ResponseEntity
                     .status(HttpStatus.NO_CONTENT)
                     .body("");
