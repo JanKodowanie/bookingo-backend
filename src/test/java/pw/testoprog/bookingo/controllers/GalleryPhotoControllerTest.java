@@ -1,6 +1,7 @@
 package pw.testoprog.bookingo.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,13 @@ import java.util.*;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.DigestUtils;
+import pw.testoprog.bookingo.models.GalleryPhoto;
 import pw.testoprog.bookingo.models.Venue;
+import pw.testoprog.bookingo.repositories.GalleryPhotoRepository;
 import pw.testoprog.bookingo.repositories.VenueRepository;
+import pw.testoprog.bookingo.serializers.FileUrlResponse;
 import pw.testoprog.bookingo.services.FileStorageService;
 
 
@@ -31,17 +36,16 @@ public class GalleryPhotoControllerTest {
     private MockMvc mockMvc;
 
     private final static String resourcePath = "/venues/{venue_id}/gallery-photos";
-    private final static String downloadPath = "/download/{file_name}";
     private final static String correctFileName = "test.png";
     private final static String incorrectFileName = "incorrect.png";
-    private InputStream inputStream;
-    private MockMultipartFile photo;
     private final ObjectMapper mapper = new ObjectMapper();
 
     private Venue venue;
 
     @Autowired
     private VenueRepository venueRepository;
+    @Autowired
+    private GalleryPhotoRepository photoRepository;
 
     @BeforeEach
     public void setup() {
@@ -50,37 +54,43 @@ public class GalleryPhotoControllerTest {
     }
 
     @Test
-    void givenCorrectFilePath_whenUploadingNewPicture_shouldReturnStatus200() throws Exception {
-        inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(correctFileName);
-        photo = new MockMultipartFile("file", correctFileName, "image/png", inputStream);
-        mockMvc.perform(multipart(resourcePath, venue.getId()).file(photo))
+    void givenCorrectData_whenUploadingNewPicture_shouldReturnStatus200() throws Exception {
+        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(correctFileName);
+        MockMultipartFile photo = new MockMultipartFile("file", correctFileName, "image/png", inputStream);
+        ResultActions resultActions = mockMvc.perform(multipart(resourcePath, venue.getId()).file(photo))
                 .andExpect(status().isOk());
+
+        Venue updatedVenue = venueRepository.findById(this.venue.getId()).get();
+        Assert.assertFalse(updatedVenue.getGalleryPhotos().isEmpty());
+        GalleryPhoto uploadedPhoto = (GalleryPhoto) updatedVenue.getGalleryPhotos().toArray()[0];
+
+        MvcResult result = resultActions.andReturn();
+        String contentAsString = result.getResponse().getContentAsString();
+        JSONObject obj = new JSONObject(contentAsString);
+        String url = obj.getString("url");
+
+        Assert.assertEquals(uploadedPhoto.getUrl(), url);
+
         inputStream.close();
     }
 
     @Test
-    void givenCorrectFilePath_whenUploadingNewPicture_shouldRetainSameMd5Hash() throws Exception {
-        inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(correctFileName);
-        String originalHash = DigestUtils.md5DigestAsHex(inputStream);
-        inputStream.close();
-        inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(correctFileName);
-        photo = new MockMultipartFile("file", correctFileName, "image/png", inputStream);
-        MvcResult result = mockMvc.perform(multipart(resourcePath, venue.getId()).file(photo))
-                .andExpect(status().isOk())
-                .andReturn();
-        Map<String, String> response = mapper.readValue(result.getResponse().getContentAsString(), Map.class);
-        String filePath = response.get("url");
-        File file = new File(filePath);
-        InputStream downloadInputStream = new FileInputStream(file);
-        String downloadHash = DigestUtils.md5DigestAsHex(downloadInputStream);
-        downloadInputStream.close();
-        Assert.assertEquals(originalHash, downloadHash);
-        inputStream.close();
+    void givenNoImage_whenUploadingNewPicture_shouldReturnStatus400() throws Exception {
+
+        mockMvc.perform(multipart(resourcePath, venue.getId()))
+                .andExpect(status().isBadRequest());
+
+        Venue updatedVenue = venueRepository.findById(this.venue.getId()).get();
+        Assert.assertTrue(updatedVenue.getGalleryPhotos().isEmpty());
+
     }
 
     @Test
-    void givenIncorrectFileName_whenDownloadingPicture_shouldReturnStatus404 () throws Exception {
-        mockMvc.perform(get(downloadPath, incorrectFileName))
+    void givenNotExistingVenue_whenUploadingNewPicture_shouldReturnStatus404() throws Exception {
+        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(correctFileName);
+        MockMultipartFile photo = new MockMultipartFile("file", correctFileName, "image/png", inputStream);
+
+        mockMvc.perform(multipart(resourcePath, venue.getId() + 100).file(photo))
                 .andExpect(status().isNotFound());
     }
 }

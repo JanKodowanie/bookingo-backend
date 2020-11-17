@@ -6,7 +6,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pw.testoprog.bookingo.exceptions.FileStorageException;
-import pw.testoprog.bookingo.exceptions.MyFileNotFoundException;
+import pw.testoprog.bookingo.exceptions.BookingoFileNotFoundException;
 import pw.testoprog.bookingo.properties.FileStorageProperties;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -23,7 +23,7 @@ public class FileStorageService {
     private final Path fileStorageLocation;
 
     @Autowired
-    public FileStorageService(FileStorageProperties fileStorageProperties) {
+    public FileStorageService(FileStorageProperties fileStorageProperties) throws FileStorageException {
         this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir())
                 .toAbsolutePath().normalize();
 
@@ -34,7 +34,7 @@ public class FileStorageService {
         }
     }
 
-    public String storeFile(MultipartFile file, String[] subdirectories, String[] acceptedExts) {
+    public String storeFile(MultipartFile file, String[] subdirectories, String[] acceptedExts) throws FileStorageException{
         // Normalize file name
         String fileName = file.getOriginalFilename();
 
@@ -63,29 +63,23 @@ public class FileStorageService {
             Files.createFile(targetFile);
             Files.copy(file.getInputStream(), targetFile, StandardCopyOption.REPLACE_EXISTING);
 
-            return String.join("/", subdirectories).join("/", newFileName);
+            return "/media/" + String.join("/", subdirectories) + "/" + newFileName;
         } catch (IOException ex) {
             throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
         }
     }
 
-    public Resource loadFileAsResource(String path) {
+    public Resource loadFileAsResource(String path) throws BookingoFileNotFoundException {
         try {
-            String[] splitPath = path.split("[/]", 2);
-            Path filePath = this.fileStorageLocation.resolve(splitPath[0]).resolve(splitPath[1]);
+            Path filePath = Paths.get(this.fileStorageLocation.toString() + path);
             Resource resource = new UrlResource(filePath.toUri());
             if(resource.exists()) {
                 return resource;
             } else {
-                throw new MyFileNotFoundException("File not found " + path);
+                throw new BookingoFileNotFoundException("File not found " + path);
             }
         } catch (MalformedURLException ex) {
-            throw new MyFileNotFoundException("File not found " + path, ex);
+            throw new BookingoFileNotFoundException("File not found " + path, ex);
         }
     }
-
-//    public String getAbsolutePath(String path) {
-//        String[] splitPath = path.split("/", 2);
-//        return this.fileStorageLocation.resolve(fileName).normalize().toString().replace("\\", "\\\\");
-//    }
 }
