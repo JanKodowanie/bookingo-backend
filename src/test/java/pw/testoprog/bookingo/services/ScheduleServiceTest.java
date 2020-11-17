@@ -1,6 +1,5 @@
 package pw.testoprog.bookingo.services;
 
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,23 +34,36 @@ public class ScheduleServiceTest {
     ScheduleService scheduleService;
 
     @Test
-    void addScheduleAsEntrepreneur() throws Exception {
+    void addScheduleAsNobody() throws Exception {
+        User user = null;
+        Schedule schedule = new Schedule(1, 1, LocalDateTime.of(2021, Month.JANUARY, 1, 8, 0, 0), LocalDateTime.of(2021, Month.JANUARY, 1, 10, 0, 0));
+        Exception exception = assertThrows(Exception.class, ()
+                        -> {
+                    Schedule addedSchedule = scheduleService.addNewSchedule(schedule, user);
+                }
+        );
+        assertTrue(exception.getMessage().contains("invalid user"));
+    }
+
+    @Test
+    void addScheduleAsUnauthorizedUser() throws Exception {
+        User user = new User("test", "test", "test", "test", "standard");
+        Schedule schedule = new Schedule(1, 1, LocalDateTime.of(2021, Month.JANUARY, 1, 8, 0, 0), LocalDateTime.of(2021, Month.JANUARY, 1, 10, 0, 0));
+        Exception exception = assertThrows(Exception.class, ()
+                        -> {
+                    Schedule addedSchedule = scheduleService.addNewSchedule(schedule, user);
+                }
+        );
+        assertTrue(exception.getMessage().contains("you must be entrepreneur to perform this action"));
+    }
+
+    @Test
+    void addScheduleAsAuthorized() throws Exception {
         User user = new User("test", "test", "test", "test", "entrepreneur");
         Schedule schedule = new Schedule(1, 1, LocalDateTime.of(2021, Month.JANUARY, 1, 8, 0, 0), LocalDateTime.of(2021, Month.JANUARY, 1, 10, 0, 0));
         Schedule addedSchedule = scheduleService.addNewSchedule(schedule, user);
         assertNotNull(addedSchedule);
-    }
-
-    @Test
-    void addScheduleAsStandard() throws Exception {
-        User user = new User("test", "test", "test", "test", "standard");
-        Schedule schedule = new Schedule(1, 1, LocalDateTime.of(2021, Month.JANUARY, 1, 8, 0, 0), LocalDateTime.of(2021, Month.JANUARY, 1, 10, 0, 0));
-        Exception exception = assertThrows(Exception.class, ()
-        -> {
-            Schedule addedSchedule = scheduleService.addNewSchedule(schedule, user);
-        }
-        );
-        assertTrue(exception.getMessage().contains("you must be entrepreneur to perform this action"));
+        assertEquals(schedule, addedSchedule);
     }
 
     @Test
@@ -64,6 +76,18 @@ public class ScheduleServiceTest {
                 }
         );
         assertTrue(exception.getMessage().contains("invalid schedule"));
+    }
+
+    @Test
+    void addScheduleWithWrongVenueId() throws Exception {
+        User user = new User("test", "test", "test", "test", "entrepreneur");
+        Schedule schedule = new Schedule(100, 1, LocalDateTime.of(2021, Month.JANUARY, 1, 8, 0, 0), LocalDateTime.of(2021, Month.JANUARY, 1, 10, 0, 0));
+        Exception exception = assertThrows(Exception.class, ()
+                        -> {
+                    Schedule addedSchedule = scheduleService.addNewSchedule(schedule, user);
+                }
+        );
+        assertEquals("Venue not found", exception.getMessage());
     }
 
 }

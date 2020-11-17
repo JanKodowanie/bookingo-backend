@@ -1,8 +1,5 @@
 package pw.testoprog.bookingo.models;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -42,4 +39,7 @@ public class Schedule {
         return String.format("Usługa o id %s w salonie o id %s od %s do %s", this.serviceTypeId, this.venueId, this.startDate, this.endDate);
     }
 
+    public Integer getVenueId() {
+        return venueId;
+    }
 }

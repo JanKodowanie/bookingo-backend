@@ -23,6 +23,9 @@ public class ScheduleService {
     VenueRepository venueRepository;
 
     @Autowired
+    VenueService venueService;
+
+    @Autowired
     ScheduleRepository scheduleRepository;
 
     public Schedule addNewSchedule(Schedule schedule, User user) throws Exception {
@@ -32,6 +35,11 @@ public class ScheduleService {
             throw new Exception("invalid user");
         if(!user.getRole().equals("entrepreneur"))
             throw new Exception("you must be entrepreneur to perform this action");
+        try {
+            Venue matchingVenue = venueService.getVenueById(schedule.getVenueId());
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
 
         scheduleRepository.save(schedule);
 
