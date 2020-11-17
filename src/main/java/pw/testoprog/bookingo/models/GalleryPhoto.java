@@ -1,5 +1,7 @@
 package pw.testoprog.bookingo.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
@@ -10,7 +12,8 @@ public class GalleryPhoto {
 
     private String url;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
+    @JsonIgnore
     private Venue venue;
 
     protected GalleryPhoto() {}

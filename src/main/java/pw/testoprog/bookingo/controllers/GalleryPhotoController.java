@@ -9,62 +9,62 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import pw.testoprog.bookingo.exceptions.FileStorageException;
+import pw.testoprog.bookingo.exceptions.UserNotFoundException;
 import pw.testoprog.bookingo.models.GalleryPhoto;
+import pw.testoprog.bookingo.models.User;
 import pw.testoprog.bookingo.models.Venue;
 import pw.testoprog.bookingo.repositories.GalleryPhotoRepository;
 import pw.testoprog.bookingo.repositories.VenueRepository;
+import pw.testoprog.bookingo.serializers.ErrorResponse;
+import pw.testoprog.bookingo.serializers.FileUrlResponse;
+import pw.testoprog.bookingo.serializers.MessageResponse;
 import pw.testoprog.bookingo.services.FileStorageService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Optional;
 
 @RestController
 public class GalleryPhotoController {
-    private final GalleryPhotoRepository repository;
-    private final VenueRepository venueRepository;
+
+    @Autowired
+    private GalleryPhotoRepository repository;
+
+    @Autowired
+    private VenueRepository venueRepository;
 
     @Autowired
     private FileStorageService fileStorageService;
 
-    public GalleryPhotoController(GalleryPhotoRepository repository, VenueRepository venueRepository) {
-        this.repository = repository;
-        this.venueRepository = venueRepository;
-    }
+
 
     @PostMapping("/venues/{venue_id}/gallery-photos")
     ResponseEntity newGalleryPhoto(@RequestParam("file") MultipartFile file, @PathVariable Integer venue_id) {
-        String fileName = fileStorageService.storeFile(file);
+        String url = null;
 
-        String url = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/download/")
-                .path(fileName)
-                .toUriString();
+        try {
+            url = fileStorageService.storeFile(file, new String[]{"venues", venue_id.toString()}, new String[]{"jpg", "png", "jpeg"});
+        } catch (FileStorageException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage()));
+        }
 
-        Venue venue = venueRepository.getOne(venue_id);
+
+        Optional<Venue> opt = venueRepository.findById(venue_id);
+
+        if (!opt.isPresent()){
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Venue with the given id was not found."));
+        }
+        Venue venue = opt.get();
         GalleryPhoto photo = new GalleryPhoto(url, venue);
         repository.save(photo);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body("{\"url\":\"" + fileStorageService.getAbsolutePath(fileName) + "\"}");
+                .body(new FileUrlResponse(url));
     }
 
-    @GetMapping("/download/{fileName:.+}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
-        Resource resource = fileStorageService.loadFileAsResource(fileName);
-
-        String contentType = null;
-        try {
-            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-        } catch (IOException ex) {
-        }
-
-        if(contentType == null) {
-            contentType = "application/octet-stream";
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
-    }
 }

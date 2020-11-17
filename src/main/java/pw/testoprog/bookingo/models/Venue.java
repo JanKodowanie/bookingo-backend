@@ -21,7 +21,7 @@ public class Venue {
     @ManyToMany(targetEntity = ServiceType.class, fetch = FetchType.EAGER)
     private Set<ServiceType> serviceTypes;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(targetEntity = GalleryPhoto.class, mappedBy="venue", cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<GalleryPhoto> galleryPhotos;
 
     public Venue() {
