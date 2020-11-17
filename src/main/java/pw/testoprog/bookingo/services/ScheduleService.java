@@ -26,23 +26,12 @@ public class ScheduleService {
     ScheduleRepository scheduleRepository;
 
     public Schedule addNewSchedule(Schedule schedule, User user) throws Exception {
-        System.out.println("dupaaa");
-        /*if(venue == null)
-            throw new Exception("Invalid venue");
-        if(serviceType == null)
-            throw new Exception("Invalid serviceType");
-        if(startDate == null)
-            throw new Exception("Invalid startDate");
-        if(endDate == null)
-            throw new Exception("Invalid endDate");
-        if(user == null)
-            throw new Exception("Invalid user");
-        if(!user.getRole().equals("entrepreneur"))
-            throw new Exception("You don't have permission to do that");*/
         if(schedule == null)
             throw new Exception("invalid schedule");
         if (user == null)
             throw new Exception("invalid user");
+        if(!user.getRole().equals("entrepreneur"))
+            throw new Exception("you must be entrepreneur to perform this action");
 
         scheduleRepository.save(schedule);
 
