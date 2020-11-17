@@ -13,6 +13,7 @@ import pw.testoprog.bookingo.repositories.ServiceTypeRepository;
 import pw.testoprog.bookingo.repositories.UserRepository;
 import pw.testoprog.bookingo.repositories.VenueRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,21 +32,28 @@ public class ReviewService {
     @Autowired
     UserRepository userRepository;
 
-    public Review addReview(Review newReview, Integer venueId, Integer serviceId) throws InvalidReviewException, VenueNotFoundException, ServiceTypeNotFoundException {
+    public Review addReview(Review newReview, Integer venueId) throws UserNotFoundException, InvalidReviewException, VenueNotFoundException, ServiceTypeNotFoundException {
         if( newReview == null)
             throw new InvalidReviewException("Invalid review");
 
-        Optional<Venue> optionalVenue = venueRepository.findById(venueId);
-        Optional<ServiceType> optionalServiceType = serviceTypeRepository.findById(serviceId);
 
+        Optional<User> optionalUser = userRepository.findById(newReview.getUser().getId());
+        Optional<Venue> optionalVenue = venueRepository.findById(venueId);
+        Optional<ServiceType> optionalServiceType = serviceTypeRepository.findById(newReview.getServiceType().getId());
+
+        if(!optionalUser.isPresent()) {
+            throw new UserNotFoundException("Incorrect user Id");
+        }
         if(!optionalVenue.isPresent()) {
             throw new VenueNotFoundException("Incorrect Venue Id");
         }
         if(!optionalServiceType.isPresent()) {
             throw new ServiceTypeNotFoundException("Incorrect Service Type Id");
         }
-        reviewRepository.save(newReview);
-        return newReview;
+
+        Review fullReview = new Review(optionalUser.get(), newReview.getContent(), optionalVenue.get(),optionalServiceType.get());
+        reviewRepository.save(fullReview);
+        return fullReview;
     }
 
     public Review getReviewById(Integer id) throws ReviewNotFoundException {
@@ -71,5 +79,33 @@ public class ReviewService {
         reviewRepository.delete(optionalReview.get());
     }
 
+    public List<Review> getAllVenueReviews(Integer venueId) throws VenueNotFoundException {
+        Optional<Venue> optionalVenue = venueRepository.findById(venueId);
+
+        if(!optionalVenue.isPresent()) {
+            throw new VenueNotFoundException("No venue with given id");
+        }
+        List<Review> reviewList = reviewRepository.findByVenueId(venueId);
+        return reviewList;
+
+    }
+
+    public Review updateReview(Integer reviewId, Review newReview) throws UserNotFoundException, UnauthorizedUserException, ReviewNotFoundException {
+        Optional<User> optionalUser = userRepository.findById(newReview.getUser().getId());
+        Optional<Review> optionalReview = reviewRepository.findById(reviewId);
+        if( !optionalUser.isPresent()) {
+            throw new UserNotFoundException("No user with given id");
+        }
+        if( !optionalReview.isPresent()) {
+            throw new ReviewNotFoundException("Not review with given id");
+        }
+        if (optionalReview.isPresent() && optionalUser.get().getId() != optionalReview.get().getUser().getId() ) {
+            throw new UnauthorizedUserException("You can only edit your own reviews");
+        }
+
+        Review updatedReview = optionalReview.get();
+        updatedReview.setContent(newReview.getContent());
+        return updatedReview;
+    }
 
 }

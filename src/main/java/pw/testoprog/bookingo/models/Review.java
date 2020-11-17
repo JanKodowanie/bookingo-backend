@@ -24,13 +24,14 @@ public class Review {
     @ManyToOne()
     private ServiceType serviceType;
 
-    private Review(User user, String content, Venue venue, ServiceType serviceType, Date creationDate) {
+    public Review() { }
+
+    public Review(User user, String content, Venue venue, ServiceType serviceType, Date creationDate) {
         this.user = user;
         this.creationDate = creationDate;
         this.content = content;
         this.venue = venue;
         this.serviceType = serviceType;
-        this.creationDate = java.sql.Timestamp.valueOf(LocalDateTime.now());
     }
 
     public Review(User user, String content, Venue venue, ServiceType serviceType) {
@@ -44,6 +45,10 @@ public class Review {
     public User getUser() {
         return user;
     }
+
+    public Integer getId() { return id; }
+
+    public void setId(Integer id) {this.id = id;}
 
     public String getContent() {
         return content;

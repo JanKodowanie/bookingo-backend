@@ -21,8 +21,6 @@ import pw.testoprog.bookingo.repositories.ServiceTypeRepository;
 import pw.testoprog.bookingo.services.BookingoUserDetailsService;
 import pw.testoprog.bookingo.services.VenueService;
 
-import javax.validation.constraints.AssertFalse;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
