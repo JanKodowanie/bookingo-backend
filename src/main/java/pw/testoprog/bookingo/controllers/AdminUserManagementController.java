@@ -6,14 +6,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pw.testoprog.bookingo.exceptions.UserNotFoundException;
 import pw.testoprog.bookingo.models.User;
-import pw.testoprog.bookingo.serializers.MessageResponse;
+import pw.testoprog.bookingo.responses.ErrorResponse;
+import pw.testoprog.bookingo.responses.MessageResponse;
 import pw.testoprog.bookingo.services.BookingoUserDetailsService;
 
 import java.util.List;
 import java.util.UUID;
 
+@RequestMapping("/admin")
 @RestController
-public class UserDataController {
+public class AdminUserManagementController {
 
     @Autowired
     private BookingoUserDetailsService userDetailsService;
@@ -26,7 +28,7 @@ public class UserDataController {
         } catch (UserNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(new MessageResponse("User with the given id was not found."));
+                    .body(new ErrorResponse("User with the given id was not found."));
         }
 
         return ResponseEntity
@@ -43,7 +45,7 @@ public class UserDataController {
         } catch (UserNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(new MessageResponse("User with the given id was not found."));
+                    .body(new ErrorResponse("User with the given id was not found."));
         }
 
         return ResponseEntity
@@ -59,7 +61,7 @@ public class UserDataController {
         } catch (UserNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(new MessageResponse("User with the given id was not found."));
+                    .body(new ErrorResponse("User with the given id was not found."));
         }
 
         return ResponseEntity
@@ -67,7 +69,7 @@ public class UserDataController {
                 .body(new MessageResponse("User was deleted successfully."));
     }
 
-    @GetMapping("/user_list")
+    @GetMapping("/user-list")
     public List<User> getUserList() {
         return userDetailsService.getAllUsers();
     }

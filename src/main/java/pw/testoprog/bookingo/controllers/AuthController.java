@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pw.testoprog.bookingo.exceptions.EmailAlreadyRegisteredException;
 import pw.testoprog.bookingo.models.User;
-import pw.testoprog.bookingo.serializers.LoginRequest;
-import pw.testoprog.bookingo.serializers.LoginResponse;
-import pw.testoprog.bookingo.serializers.ErrorResponse;
-import pw.testoprog.bookingo.serializers.RegistrationSuccessResponse;
+import pw.testoprog.bookingo.responses.LoginRequest;
+import pw.testoprog.bookingo.responses.LoginResponse;
+import pw.testoprog.bookingo.responses.ErrorResponse;
+import pw.testoprog.bookingo.responses.RegistrationSuccessResponse;
 import pw.testoprog.bookingo.services.BookingoUserDetailsService;
 import pw.testoprog.bookingo.services.JWTManager;
 
@@ -42,7 +42,7 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body("Credentials provided are incorrect.");
+                    .body(new ErrorResponse("Credentials provided are incorrect."));
         }
 
         final UserDetails userDetails = userDetailsService

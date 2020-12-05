@@ -1,4 +1,4 @@
-package pw.testoprog.bookingo.serializers;
+package pw.testoprog.bookingo.services;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,4 +1,4 @@
-package pw.testoprog.bookingo.properties;
+package pw.testoprog.bookingo.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

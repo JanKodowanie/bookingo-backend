@@ -9,22 +9,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.*;
-import java.util.*;
 
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.util.DigestUtils;
 import pw.testoprog.bookingo.models.GalleryPhoto;
 import pw.testoprog.bookingo.models.Venue;
 import pw.testoprog.bookingo.repositories.GalleryPhotoRepository;
 import pw.testoprog.bookingo.repositories.VenueRepository;
-import pw.testoprog.bookingo.serializers.FileUrlResponse;
-import pw.testoprog.bookingo.services.FileStorageService;
 
-
-import javax.servlet.ServletOutputStream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

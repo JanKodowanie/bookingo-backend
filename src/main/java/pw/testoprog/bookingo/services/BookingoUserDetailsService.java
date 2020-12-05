@@ -8,7 +8,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pw.testoprog.bookingo.exceptions.EmailAlreadyRegisteredException;
 import pw.testoprog.bookingo.exceptions.UserNotFoundException;
-import pw.testoprog.bookingo.serializers.BookingoUserDetails;
 import pw.testoprog.bookingo.models.User;
 import pw.testoprog.bookingo.repositories.UserRepository;
 
