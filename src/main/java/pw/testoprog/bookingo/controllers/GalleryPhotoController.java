@@ -10,11 +10,12 @@ import pw.testoprog.bookingo.models.GalleryPhoto;
 import pw.testoprog.bookingo.models.Venue;
 import pw.testoprog.bookingo.repositories.GalleryPhotoRepository;
 import pw.testoprog.bookingo.repositories.VenueRepository;
-import pw.testoprog.bookingo.responses.ErrorResponse;
-import pw.testoprog.bookingo.responses.FileUrlResponse;
-import pw.testoprog.bookingo.responses.MessageResponse;
+import pw.testoprog.bookingo.dto.ErrorResponse;
+import pw.testoprog.bookingo.dto.FileUrlResponse;
+import pw.testoprog.bookingo.dto.MessageResponse;
 import pw.testoprog.bookingo.services.FileStorageService;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 @RestController
@@ -40,7 +41,7 @@ public class GalleryPhotoController {
         } catch (FileStorageException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse(e.getMessage()));
+                    .body(new ErrorResponse(Arrays.asList(e.getMessage())));
         }
 
 

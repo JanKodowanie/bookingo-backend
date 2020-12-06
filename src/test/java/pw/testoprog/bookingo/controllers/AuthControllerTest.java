@@ -14,13 +14,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import pw.testoprog.bookingo.exceptions.UserNotFoundException;
 import pw.testoprog.bookingo.models.User;
 import pw.testoprog.bookingo.services.BookingoUserDetailsService;
 import pw.testoprog.bookingo.services.JWTManager;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -72,7 +70,7 @@ class AuthControllerTest {
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/auth/register/standard")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{ \"firstName\":\"testUser\", \"lastName\":\"testUser\", \"emailAddress\":\"testUser@test.test\", \"password\":\"testUser\" }")
+                .content("{ \"first_name\":\"testUser\", \"last_name\":\"testUser\", \"email\":\"testUser@test.test\", \"password\":\"testUser\" }")
         )
                 .andExpect(status().is2xxSuccessful());
 

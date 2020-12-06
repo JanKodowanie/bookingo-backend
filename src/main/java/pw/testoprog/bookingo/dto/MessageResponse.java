@@ -1,4 +1,4 @@
-package pw.testoprog.bookingo.responses;
+package pw.testoprog.bookingo.dto;
 
 public class MessageResponse {
 

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import pw.testoprog.bookingo.dto.UserDTO;
 import pw.testoprog.bookingo.models.Schedule;
 import pw.testoprog.bookingo.models.ServiceType;
 import pw.testoprog.bookingo.models.User;
@@ -29,9 +30,9 @@ class DBInitializer {
     CommandLineRunner initDatabase(ServiceTypeRepository serviceTypeRepository, VenueRepository venueRepository, BookingoUserDetailsService userDetailsService, ScheduleRepository scheduleRepository) {
 
         return args -> {
-            User u1 = userDetailsService.registerUser(new User("j.kowalski@gmail.com", "password", "Jan", "Kowalski", ""), "Entrepreneur");
-            User u2 = userDetailsService.registerUser(new User("a.nowak@gmail.com", "password", "Anna", "Nowak", ""), "Entrepreneur");
-            User u3 = userDetailsService.registerUser(new User("pan@admin.com", "admin", "Adminus", "Maximus", "Admin"), "Admin");
+            User u1 = userDetailsService.registerUser(new UserDTO("j.kowalski@gmail.com", "password", "Jan", "Kowalski"), "Entrepreneur");
+            User u2 = userDetailsService.registerUser(new UserDTO("a.nowak@gmail.com", "password", "Anna", "Nowak"), "Entrepreneur");
+            User u3 = userDetailsService.registerUser(new UserDTO("pan@admin.com", "admin", "Adminus", "Maximus"), "Admin");
 
             ServiceType s1 = serviceTypeRepository.save(new ServiceType("Strzyżenie"));
             ServiceType s2 = serviceTypeRepository.save(new ServiceType("Manicure"));

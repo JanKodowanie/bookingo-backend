@@ -1,8 +1,12 @@
-package pw.testoprog.bookingo.responses;
+package pw.testoprog.bookingo.dto;
+import javax.validation.constraints.NotEmpty;
 
 public class LoginRequest {
 
+    @NotEmpty(message = "Email must be provided.")
     private String email;
+
+    @NotEmpty(message = "Password must be provided.")
     private String password;
 
     public LoginRequest(String email, String password) {

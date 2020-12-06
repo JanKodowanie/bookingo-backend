@@ -9,11 +9,12 @@ import org.springframework.stereotype.Service;
 import pw.testoprog.bookingo.exceptions.EmailAlreadyRegisteredException;
 import pw.testoprog.bookingo.exceptions.UserNotFoundException;
 import pw.testoprog.bookingo.models.User;
+import pw.testoprog.bookingo.dto.UserDTO;
 import pw.testoprog.bookingo.repositories.UserRepository;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingoUserDetailsService implements UserDetailsService {
@@ -33,16 +34,15 @@ public class BookingoUserDetailsService implements UserDetailsService {
         return user.map(BookingoUserDetails::new).get();
     }
 
-    public User registerUser(User user, String role) throws EmailAlreadyRegisteredException {
-        Optional<User> alreadyRegisteredUser = userRepository.findByEmailAddress(user.getEmailAddress());
+    public User registerUser(UserDTO userDTO, String role) throws EmailAlreadyRegisteredException {
+        Optional<User> alreadyRegisteredUser = userRepository.findByEmailAddress(userDTO.getEmailAddress());
 
         if (alreadyRegisteredUser.isPresent()) {
             throw new EmailAlreadyRegisteredException("User with this email already exists");
         }
 
-        String plain_pass = user.getPassword();
-        user.setPassword(passwordEncoder.encode(plain_pass));
-        user.setRole(role);
+        String encodedPass = passwordEncoder.encode(userDTO.getPassword());
+        User user = new User(userDTO, encodedPass, role);
         userRepository.save(user);
 
         return user;
@@ -52,33 +52,45 @@ public class BookingoUserDetailsService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public User getUserDetails(UUID id) throws UserNotFoundException {
+    public List<UserDTO> getAllUserDetails() {
+        return userRepository.findAll().stream().map(UserDTO::new).collect(Collectors.toList());
+    }
+
+    public UserDTO getUserDetails(UUID id) throws UserNotFoundException {
         Optional<User> user = userRepository.findById(id);
         if (!user.isPresent()) {
             throw new UserNotFoundException("User with this id was not found.");
         }
-        return user.get();
+
+        return new UserDTO(user.get());
     }
 
-    public User updateUser(UUID id, User user_data) throws UserNotFoundException {
-        Optional<User> user_optional = userRepository.findById(id);
-        if (!user_optional.isPresent()) {
+    public UserDTO updateUser(UUID id, UserDTO userDTO) throws UserNotFoundException, EmailAlreadyRegisteredException {
+        Optional<User> userOptional = userRepository.findById(id);
+        if (!userOptional.isPresent()) {
             throw new UserNotFoundException("User with this id was not found.");
         }
 
-        User user = user_optional.get();
-        if (user_data.getEmailAddress() != null) {
-            user.setEmailAddress(user_data.getEmailAddress());
+        User user = userOptional.get();
+        if (userDTO.getEmailAddress() != null) {
+            Optional<User> alreadyRegisteredUser = userRepository.findByEmailAddress(userDTO.getEmailAddress());
+
+            if (alreadyRegisteredUser.isPresent()) {
+                throw new EmailAlreadyRegisteredException("User with this email already exists");
+            }
+
+            user.setEmailAddress(userDTO.getEmailAddress());
         }
-        if (user_data.getFirstName() != null) {
-            user.setEmailAddress(user_data.getFirstName());
+        if (userDTO.getFirstName() != null) {
+            user.setFirstName(userDTO.getFirstName());
         }
-        if (user_data.getLastName() != null) {
-            user.setEmailAddress(user_data.getLastName());
+        if (userDTO.getLastName() != null) {
+            user.setLastName(userDTO.getLastName());
         }
 
         userRepository.save(user);
-        return user;
+
+        return new UserDTO(user);
     }
 
     public void deleteUser(UUID id) throws UserNotFoundException {

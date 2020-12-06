@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pw.testoprog.bookingo.models.Venue;
-import pw.testoprog.bookingo.responses.MessageResponse;
+import pw.testoprog.bookingo.dto.MessageResponse;
 import pw.testoprog.bookingo.services.VenueService;
 
 import javax.validation.Valid;
