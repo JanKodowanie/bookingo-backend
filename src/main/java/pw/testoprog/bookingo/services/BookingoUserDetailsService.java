@@ -31,7 +31,7 @@ public class BookingoUserDetailsService implements UserDetailsService {
         if (!user.isPresent()) {
             throw new UsernameNotFoundException("User was not found.");
         }
-        return user.map(BookingoUserDetails::new).get();
+        return user.map(UserDTO::new).get();
     }
 
     public User registerUser(UserDTO userDTO, String role) throws EmailAlreadyRegisteredException {

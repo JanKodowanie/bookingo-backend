@@ -2,13 +2,17 @@ package pw.testoprog.bookingo.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import pw.testoprog.bookingo.models.User;
-
 import javax.validation.constraints.NotEmpty;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.UUID;
 
-public class UserDTO {
+public class UserDTO implements UserDetails {
 
     private UUID id;
 
@@ -73,9 +77,46 @@ public class UserDTO {
         this.emailAddress = emailAddress;
     }
 
+    @Override
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Arrays.asList(new SimpleGrantedAuthority(this.getRole()));
+    }
+
+    @Override
     @JsonIgnore
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    @JsonIgnore
+    public String getUsername() {
+        return emailAddress;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonExpired() {
+        return active;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonLocked() {
+        return active;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isCredentialsNonExpired() {
+        return active;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isEnabled() {
+        return active;
     }
 
     @JsonProperty("password")
