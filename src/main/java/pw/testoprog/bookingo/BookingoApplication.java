@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import pw.testoprog.bookingo.properties.FileStorageProperties;
+import pw.testoprog.bookingo.config.FileStorageProperties;
 
 @EnableConfigurationProperties({
         FileStorageProperties.class

@@ -1,18 +1,19 @@
-package pw.testoprog.bookingo;
+package pw.testoprog.bookingo.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import pw.testoprog.bookingo.dto.UserDTO;
 import pw.testoprog.bookingo.models.Schedule;
 import pw.testoprog.bookingo.models.ServiceType;
 import pw.testoprog.bookingo.models.User;
 import pw.testoprog.bookingo.models.Venue;
 import pw.testoprog.bookingo.repositories.ScheduleRepository;
 import pw.testoprog.bookingo.repositories.ServiceTypeRepository;
-import pw.testoprog.bookingo.repositories.UserRepository;
 import pw.testoprog.bookingo.repositories.VenueRepository;
+import pw.testoprog.bookingo.services.BookingoUserDetailsService;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -21,16 +22,17 @@ import java.util.Collections;
 import java.util.HashSet;
 
 @Configuration
-class LoadDatabase {
+class DBInitializer {
 
-    private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
+    private static final Logger log = LoggerFactory.getLogger(DBInitializer.class);
 
     @Bean
-    CommandLineRunner initDatabase(ServiceTypeRepository serviceTypeRepository, VenueRepository venueRepository, UserRepository userRepository, ScheduleRepository scheduleRepository) {
+    CommandLineRunner initDatabase(ServiceTypeRepository serviceTypeRepository, VenueRepository venueRepository, BookingoUserDetailsService userDetailsService, ScheduleRepository scheduleRepository) {
 
         return args -> {
-            User u1 = userRepository.save(new User("j.kowalski@gmail.com", "password", "Jan", "Kowalski", "entrepreneur"));
-            User u2 = userRepository.save(new User("a.nowak@gmail.com", "password", "Anna", "Nowak", "entrepreneur"));
+            User u1 = userDetailsService.registerUser(new UserDTO("j.kowalski@gmail.com", "password", "Jan", "Kowalski"), "Entrepreneur");
+            User u2 = userDetailsService.registerUser(new UserDTO("a.nowak@gmail.com", "password", "Anna", "Nowak"), "Entrepreneur");
+            User u3 = userDetailsService.registerUser(new UserDTO("pan@admin.com", "admin", "Adminus", "Maximus"), "Admin");
 
             ServiceType s1 = serviceTypeRepository.save(new ServiceType("Strzyżenie"));
             ServiceType s2 = serviceTypeRepository.save(new ServiceType("Manicure"));

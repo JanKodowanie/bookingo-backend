@@ -11,16 +11,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pw.testoprog.bookingo.dto.*;
 import pw.testoprog.bookingo.exceptions.EmailAlreadyRegisteredException;
 import pw.testoprog.bookingo.models.User;
-import pw.testoprog.bookingo.serializers.LoginRequest;
-import pw.testoprog.bookingo.serializers.LoginResponse;
-import pw.testoprog.bookingo.serializers.ErrorResponse;
-import pw.testoprog.bookingo.serializers.RegistrationSuccessResponse;
 import pw.testoprog.bookingo.services.BookingoUserDetailsService;
 import pw.testoprog.bookingo.services.JWTManager;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 
 @RestController
 @RequestMapping("/auth")
@@ -34,7 +32,7 @@ public class AuthController {
     private JWTManager jwtManager;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest data)  {
+    public ResponseEntity<?> login(@RequestBody @Valid  LoginRequest data)  {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(data.getEmail(), data.getPassword())
@@ -42,7 +40,7 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body("Credentials provided are incorrect.");
+                    .body(new ErrorResponse(Arrays.asList("Credentials provided are incorrect.")));
         }
 
         final UserDetails userDetails = userDetailsService
@@ -53,51 +51,46 @@ public class AuthController {
     }
 
     @PostMapping("/register/standard")
-    public ResponseEntity registerStandard(@Valid @RequestBody User newUser)  {
+    public ResponseEntity registerStandard(@Valid @RequestBody UserDTO userDTO)  {
         try {
-            newUser = userDetailsService.registerUser(newUser, "Standard");
+            User newUser = userDetailsService.registerUser(userDTO, "Standard");
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(new RegistrationSuccessResponse(newUser.getId(), newUser.getRole()));
         }
         catch (EmailAlreadyRegisteredException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("Account with this email already exists."));
+                    .body(new ErrorResponse(Arrays.asList("Account with this email already exists.")));
         }
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(new RegistrationSuccessResponse(newUser.getId(), newUser.getRole()));
     }
 
     @PostMapping("/register/entrepreneur")
-    public ResponseEntity registerEntrepreneur(@Valid @RequestBody User newUser)  {
+    public ResponseEntity registerEntrepreneur(@Valid @RequestBody UserDTO userDTO)  {
         try {
-            newUser = userDetailsService.registerUser(newUser, "Entrepreneur");
+            User newUser = userDetailsService.registerUser(userDTO, "Entrepreneur");
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(new RegistrationSuccessResponse(newUser.getId(), newUser.getRole()));
         }
         catch (EmailAlreadyRegisteredException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("Account with this email already exists."));
+                    .body(new ErrorResponse(Arrays.asList("Account with this email already exists.")));
         }
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(new RegistrationSuccessResponse(newUser.getId(), newUser.getRole()));
     }
 
     @PostMapping("/register/admin")
-    public ResponseEntity registerAdmin(@Valid @RequestBody User newUser)  {
+    public ResponseEntity registerAdmin(@Valid @RequestBody UserDTO userDTO) {
         try {
-            newUser = userDetailsService.registerUser(newUser, "Admin");
-        }
-        catch (EmailAlreadyRegisteredException e) {
+            User newUser = userDetailsService.registerUser(userDTO, "Admin");
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(new RegistrationSuccessResponse(newUser.getId(), newUser.getRole()));
+        } catch (EmailAlreadyRegisteredException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("Account with this email already exists."));
+                    .body(new ErrorResponse(Arrays.asList("Account with this email already exists.")));
         }
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(new RegistrationSuccessResponse(newUser.getId(), newUser.getRole()));
     }
-
 }

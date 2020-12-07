@@ -1,14 +1,9 @@
 package pw.testoprog.bookingo.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.springframework.lang.NonNull;
-
+import pw.testoprog.bookingo.dto.UserDTO;
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -17,20 +12,28 @@ public class User {
     @Id
     @GeneratedValue
     private UUID id;
+
     @Column(unique = true)
-    @NotNull(message = "emailAddress must be provided.")
     private String emailAddress;
-    @NotNull(message = "password must be provided.")
+
     private String password;
-    @NotNull(message = "firstName must be provided.")
+
     private String firstName;
-    @NotNull(message = "lastName must be provided.")
+
     private String lastName;
+
     @Column(nullable = false, updatable = false)
-    @JsonIgnore
     private LocalDate createdOn = LocalDate.now();
+
     private boolean active = true;
+
     private String role;
+
+    @OneToMany(targetEntity = Venue.class, mappedBy="user", cascade=CascadeType.ALL)
+    private Set<Venue> venues;
+
+    @OneToMany(targetEntity = Review.class, mappedBy="user", cascade=CascadeType.ALL)
+    private Set<Review> reviews;
 
     public User() {}
 
@@ -39,6 +42,14 @@ public class User {
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.role = role;
+    }
+
+    public User(UserDTO userData, String password, String role) {
+        this.emailAddress = userData.getEmailAddress();
+        this.password = password;
+        this.firstName = userData.getFirstName();
+        this.lastName = userData.getLastName();
         this.role = role;
     }
 
@@ -63,12 +74,10 @@ public class User {
         this.emailAddress = emailAddress;
     }
 
-    @JsonIgnore
     public String getPassword() {
         return password;
     }
 
-    @JsonProperty("password")
     public void setPassword(String password) {
         this.password = password;
     }
@@ -113,4 +122,11 @@ public class User {
         this.role = role;
     }
 
+    public Set<Venue> getVenues() { return venues; }
+
+    public void setVenues(Set<Venue> venues) { this.venues = venues; }
+
+    public Set<Review> getReviews() { return reviews; }
+
+    public void setReviews(Set<Review> reviews) { this.reviews = reviews; }
 }

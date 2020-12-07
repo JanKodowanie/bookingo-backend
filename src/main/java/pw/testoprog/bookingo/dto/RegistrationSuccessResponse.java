@@ -1,4 +1,4 @@
-package pw.testoprog.bookingo.serializers;
+package pw.testoprog.bookingo.dto;
 
 import java.util.UUID;
 

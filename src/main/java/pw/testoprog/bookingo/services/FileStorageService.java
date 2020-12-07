@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pw.testoprog.bookingo.exceptions.FileStorageException;
 import pw.testoprog.bookingo.exceptions.BookingoFileNotFoundException;
-import pw.testoprog.bookingo.properties.FileStorageProperties;
+import pw.testoprog.bookingo.config.FileStorageProperties;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;

@@ -4,51 +4,51 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pw.testoprog.bookingo.dto.UserDTO;
+import pw.testoprog.bookingo.exceptions.EmailAlreadyRegisteredException;
 import pw.testoprog.bookingo.exceptions.UserNotFoundException;
 import pw.testoprog.bookingo.models.User;
-import pw.testoprog.bookingo.serializers.MessageResponse;
+import pw.testoprog.bookingo.dto.ErrorResponse;
+import pw.testoprog.bookingo.dto.MessageResponse;
 import pw.testoprog.bookingo.services.BookingoUserDetailsService;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@RequestMapping("/admin")
 @RestController
-public class UserDataController {
+public class AdminUserManagementController {
 
     @Autowired
     private BookingoUserDetailsService userDetailsService;
 
     @GetMapping("/user/{id}")
     public ResponseEntity getUserDetails(@PathVariable UUID id) {
-        User user = null;
         try {
-             user = userDetailsService.getUserDetails(id);
+             UserDTO userDTO = userDetailsService.getUserDetails(id);
+             return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(userDTO);
         } catch (UserNotFoundException e) {
-            return ResponseEntity
+             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(new MessageResponse("User with the given id was not found."));
+                    .body(new ErrorResponse(Arrays.asList("User with the given id was not found.")));
         }
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(user);
     }
 
     @PatchMapping("/user/{id}")
-    public ResponseEntity editUserDetails(@PathVariable UUID id, @RequestBody User user_data) {
-        User user = null;
+    public ResponseEntity editUserDetails(@PathVariable UUID id, @RequestBody UserDTO userDTO) {
         try {
-            user = userDetailsService.getUserDetails(id);
-            user = userDetailsService.updateUser(id, user_data);
-        } catch (UserNotFoundException e) {
+            UserDTO newData = userDetailsService.updateUser(id, userDTO);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(newData);
+        } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(new MessageResponse("User with the given id was not found."));
+                    .body(new ErrorResponse(Arrays.asList(e.getMessage())));
         }
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(user);
     }
 
     @DeleteMapping("/user/{id}")
@@ -59,7 +59,7 @@ public class UserDataController {
         } catch (UserNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(new MessageResponse("User with the given id was not found."));
+                    .body(new ErrorResponse(Arrays.asList("User with the given id was not found.")));
         }
 
         return ResponseEntity
@@ -67,9 +67,9 @@ public class UserDataController {
                 .body(new MessageResponse("User was deleted successfully."));
     }
 
-    @GetMapping("/user_list")
-    public List<User> getUserList() {
-        return userDetailsService.getAllUsers();
+    @GetMapping("/user-list")
+    public List<UserDTO> getUserList() {
+        return userDetailsService.getAllUserDetails();
     }
 
 }
